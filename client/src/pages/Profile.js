@@ -5,12 +5,20 @@ import {  Navigate, useParams } from 'react-router-dom';
 import FriendList from '../components/FriendList';
 import Auth from '../utils/auth';
 import ThoughtList from '../components/ThoughtList';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { QUERY_USER, QUERY_ME } from '../utils/queries';
+//* importing mutations to add a friend and useQuery
+import { ADD_FRIEND } from '../utils/mutation';
+//* importing thoughtform
+import ThoughtForm from '../components/ThoughtForm';
+
 
 //*Again, this is very similar to the logic in SingleThought.js. The useParams Hook retrieves the username from the URL, which is then passed to the useQuery Hook. 
 //*The user object that is created afterwards is used to populate the JSX. This includes passing props to the ThoughtList component to render a list of thoughts unique to this user.
 const Profile = () => {
+//*destructure the mutation function from ADD_FRIEND so we can use it in a click function.
+//*the addFriend() mutation returns an updated user object whose ID matches the me object already stored in cache. When the cache is updated, the useQuery(QUERY_ME_BASIC) Hook on the homepage causes a re-render.
+  const [addFriend] = useMutation(ADD_FRIEND);
   const { username: userParam } = useParams();
 
   const { loading, data } = useQuery(userParam ? QUERY_USER : QUERY_ME, {
@@ -39,6 +47,16 @@ if (Auth.loggedIn() && Auth.getProfile().data.username === userParam) {
       </h4>
     );
   }
+//*We'll need to define the callback function that it references. So before the component's return statement, declare a handleClick() function with the following code to utilize the addFriend() mutation function
+  const handleClick = async () => {
+    try {
+      await addFriend({
+        variables: { id: user._id }
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div>
@@ -49,6 +67,13 @@ if (Auth.loggedIn() && Auth.getProfile().data.username === userParam) {
           Viewing {userParam ? `${user.username}'s` : 'your'} profile.
           {/* {user.username}'s */}
         </h2>
+        {/* With these changes, the userParam variable is only defined when the route includes a username (e.g., /profile/Marisa86). Thus, the button won't display when the route is simply /profile. */}
+        {userParam && (
+      <button className="btn ml-auto" onClick={handleClick}>
+        Add Friend
+      </button>
+        )}
+
       </div>
 
       <div className="flex-row justify-space-between mb-3">
@@ -65,6 +90,8 @@ if (Auth.loggedIn() && Auth.getProfile().data.username === userParam) {
           {/* PRINT FRIEND LIST */}
           </div>
       </div>
+      {/* Next, update the Profile component to also render the form. This time, we'll use the userParam variable to make sure the form only displays on the user's own Profile page, not on other users' pages.  */}
+      <div className="mb-3">{!userParam && <ThoughtForm />}</div>
     </div>
   );
 };

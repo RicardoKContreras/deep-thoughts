@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 //* import apollo and login mutation from utils/mutation
+//*the useMutation() Hook simply returns a function that we can use to eventually execute the mutation. If we need to do it immediately, we can implement it with the useEffect() Hook.
 import { useMutation } from '@apollo/client';
 import { LOGIN_USER } from '../utils/mutation';
 //* import Auth from utils/auth

@@ -8,6 +8,9 @@ import { QUERY_THOUGHTS, QUERY_ME_BASIC} from '../utils/queries';
 import Auth from '../utils/auth';
 import ThoughtList from '../components/ThoughtList';
 import FriendList from '../components/FriendList';
+//*importing thought form
+
+import ThoughtForm from '../components/ThoughtForm';
 
 const Home = () => {
    // use useQuery hook to make query request
@@ -20,6 +23,11 @@ const loggedIn = Auth.loggedIn();
   return (
     <main>
       <div className='flex-row justify-space-between'>
+      {loggedIn && (
+      <div className="col-12 mb-3">
+        <ThoughtForm />
+      </div>
+    )}
       {/* With this in place, we're conditionally defining the layout for this <div>. If the user isn't logged in, it'll span the full width of the row. But if you the user is logged in, it'll only span eight columns, leaving space for a four-column <div> on the righthand side. */}
         <div className={`col-12 mb-3 ${loggedIn && 'col-lg-8'}`}>
           {loading ? (

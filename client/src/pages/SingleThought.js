@@ -6,6 +6,10 @@ import { useQuery } from '@apollo/client';
 import { QUERY_THOUGHT } from '../utils/queries';
 //* import ReactionList component
 import ReactionList from '../components/ReactionList';
+//* import Reaction form and authentication
+import ReactionForm from '../components/ReactionForm';
+import Auth from '../utils/auth';
+
 const SingleThought = props => {
   //*ID that was logged matches the ID from the URL. In the next section, we'll use that ID to retrieve more information about the given thought and populate the Single Thought page with real data.
   //* This is similar to the query logic that you used on the homepage. The variables loading and data are destructured from the useQuery Hook
@@ -38,6 +42,7 @@ const SingleThought = props => {
         </div>
       </div>
       {thought.reactionCount > 0 && <ReactionList reactions={thought.reactions} />}
+      {Auth.loggedIn() && <ReactionForm thoughtId={thought._id} />}
     </div>
   );
 };
