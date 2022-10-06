@@ -1,6 +1,9 @@
 import React from 'react';
 //* copy import apollprovider and dependencies
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+//* importfunction from Apollo Client that will retrieve the token from localStorage and include it with each request to the API
+//*With this function, setContext, we can create essentially a middleware function that will retrieve the token for us and combine it with the existing httpLink
+import { setContext } from '@apollo/client/link/context';
 import Header from './components/Header';
 import Footer from './components/Footer';
 //* Copy for importing BrowserRouter, Routes, and Route are components that the React Router library provides. We renamed BrowserRouter to Router to make it easier to work with
@@ -17,8 +20,22 @@ const httpLink = createHttpLink({
   uri: '/graphql',
 });
 
+//*With the configuration of authLink, we use the setContext() function to retrieve the token from localStorage and set the HTTP request headers of every request to include the token, whether the request needs it or not. This is fine, because if the request doesn't need the token, our server-side resolver function won't check for it.
+//*Because we're not using the first parameter, but we still need to access the second one, we can use an underscore _ to serve as a placeholder for the first parameter
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('id_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
 const client = new ApolloClient({
-  link: httpLink,
+  //*we need to combine the authLink and httpLink objects so that every request retrieves the token and sets the request headers before making the request to the API.
+  link: authLink.concat(httpLink),
+  //*httpLink,
   cache: new InMemoryCache(),
 });
 
